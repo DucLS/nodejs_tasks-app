@@ -1,0 +1,25 @@
+version: "2"
+
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: .docker/nodejs/Dockerfile
+    container_name: nodejs_app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/usr/src/app # mount current directory to container
+    user: "319820044:319816193"
+    restart: unless-stopped
+  mongo:
+    image: mongo
+    ports:
+      - 27018:27017
+    volumes:
+      - ./.docker/mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=Aa@123456
+    user: "319820044:319816193"
+    restart: unless-stopped
