@@ -5,12 +5,14 @@ services:
     build:
       context: .
       dockerfile: .docker/nodejs/Dockerfile
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
     container_name: nodejs_app
     ports:
       - 3000:3000
     volumes:
       - ./:/usr/src/app # mount current directory to container
-    user: "319820044:319816193"
     restart: unless-stopped
   mongo:
     image: mongo
@@ -21,5 +23,4 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=Aa@123456
-    user: "319820044:319816193"
     restart: unless-stopped
