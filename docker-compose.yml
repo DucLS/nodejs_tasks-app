@@ -9,7 +9,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - /home/node/app/node_modules
+      - home/node/app/node_modules
       - ./:/home/node/app # mount current directory to container
     restart: unless-stopped
   mongo:
