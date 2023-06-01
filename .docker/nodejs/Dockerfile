@@ -1,7 +1,7 @@
 FROM node:lts-alpine3.17
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /home/node/app
 
 # Install app dependencies
 COPY package*.json ./
