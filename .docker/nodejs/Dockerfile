@@ -1,7 +1,7 @@
 FROM node:lts-hydrogen
 
 # Create app directory
-WORKDIR /home/node/app
+WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package*.json ./

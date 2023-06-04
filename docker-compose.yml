@@ -7,10 +7,10 @@ services:
       dockerfile: .docker/nodejs/Dockerfile
     container_name: nodejs_app
     ports:
-      - 3000:3000
+      - ${PORT}:3000
     volumes:
-      - home/node/app/node_modules
-      - ./:/home/node/app # mount current directory to container
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
     restart: unless-stopped
   mongo:
     image: mongo
@@ -19,6 +19,6 @@ services:
     volumes:
       - ./.docker/mongodb:/data/db
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=Aa@123456
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     restart: unless-stopped

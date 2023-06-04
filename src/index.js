@@ -1,8 +1,24 @@
 const express = require("express");
-const app = express();
-const port = 3000;
+const dotenv = require("dotenv");
+require("./db/mongoose");
+const userRouter = require("./routes/user.route");
+const taskRouter = require("./routes/task.route");
 
-app.get("/", (req, res) => res.send("Hello World!"));
+dotenv.config({ path: __dirname + "/./../.env" });
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Use express.json() to parse incoming requests with JSON payloads
+app.use(express.json());
+
+// Setup route API User
+app.use(userRouter);
+
+// Setup route API Task
+app.use(taskRouter);
+
+app.get("/", (req, res) => res.send("Hello Sun!"));
 
 app.listen(port, () => {
   console.log(`Server is running on ${port} port`);
