@@ -1,17 +1,24 @@
 const express = require("express");
+
 const router = new express.Router();
 const User = require("../models/user.model");
+const auth = require("../middleware/auth");
 
 router.post("/users", async (req, res) => {
   const user = new User(req.body);
 
   try {
     await user.save();
+    const token = await user.generateAuthToken();
 
-    res.status(201).json(user);
+    res.status(201).json({ user, token });
   } catch (err) {
     res.status(400).json(err.errors);
   }
+});
+
+router.get("/users/me", auth, async (req, res) => {
+  res.json(req.user);
 });
 
 router.get("/users", async (req, res) => {
@@ -53,8 +60,13 @@ router.patch("/users/:id", async (req, res) => {
   }
 
   try {
-    const opts = { runValidators: true, new: true };
-    const user = await User.findByIdAndUpdate(_id, req.body, opts);
+    const user = await User.findById(req.params.id);
+
+    updates.forEach((update) => {
+      user[update] = req.body[update];
+    });
+
+    await user.save();
 
     if (!user) {
       res.status(404).json();
@@ -77,6 +89,33 @@ router.delete("/users/:id", async (req, res) => {
     res.send(user);
   } catch (err) {
     res.status(500).json({ err: "Something went wrong!" });
+  }
+});
+
+router.post("/users/login", async (req, res) => {
+  try {
+    const user = await User.findByCredentials(
+      req.body.email,
+      req.body.password
+    );
+    const token = await user.generateAuthToken();
+
+    res.json({ user, token });
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+router.post("/users/logout", auth, async (req, res) => {
+  try {
+    const { user, token: reqToken } = req;
+
+    user.tokens = user.tokens.filter((token) => token.token !== reqToken);
+    await user.save();
+
+    res.json({ Msg: "Logout" });
+  } catch (err) {
+    res.status(500).json({ Msg: "Logout fail" });
   }
 });
 

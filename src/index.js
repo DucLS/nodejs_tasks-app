@@ -1,13 +1,18 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
+
 require("./db/mongoose");
 const userRouter = require("./routes/user.route");
 const taskRouter = require("./routes/task.route");
+const auth = require("./middleware/auth");
 
 dotenv.config({ path: __dirname + "/./../.env" });
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+app.use(morgan("dev"));
 
 // Use express.json() to parse incoming requests with JSON payloads
 app.use(express.json());
