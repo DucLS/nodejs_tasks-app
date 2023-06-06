@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const Task = require("./task.model");
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
@@ -52,6 +52,13 @@ const userSchema = new Schema({
   ],
 });
 
+// Setup foreign key
+userSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner",
+});
+
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
 
@@ -78,6 +85,17 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 };
 
+userSchema.methods.getPublicProfile = function () {
+  const { _id, name, age, email } = this;
+
+  return {
+    _id,
+    name,
+    age,
+    email,
+  };
+};
+
 // Hash password before save
 userSchema.pre("save", async function (next) {
   const user = this;
@@ -85,6 +103,13 @@ userSchema.pre("save", async function (next) {
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);
   }
+
+  next();
+});
+
+userSchema.pre("remove", async function (next) {
+  const user = this;
+  Task.deleteMany({ owner: user._id });
 
   next();
 });

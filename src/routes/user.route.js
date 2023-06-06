@@ -31,11 +31,9 @@ router.get("/users", async (req, res) => {
   }
 });
 
-router.get("/users/:id", async (req, res) => {
-  const _id = req.params.id;
-
+router.get("/users/:id", auth, async (req, res) => {
   try {
-    const user = await User.findById(_id);
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
@@ -47,8 +45,7 @@ router.get("/users/:id", async (req, res) => {
   }
 });
 
-router.patch("/users/:id", async (req, res) => {
-  const _id = req.params.id;
+router.patch("/users/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "age"];
   const isValidOperation = updates.every((update) =>
@@ -60,19 +57,13 @@ router.patch("/users/:id", async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.params.id);
-
     updates.forEach((update) => {
-      user[update] = req.body[update];
+      req.user[update] = req.body[update];
     });
 
-    await user.save();
+    await req.user.save();
 
-    if (!user) {
-      res.status(404).json();
-    }
-
-    res.json(user);
+    res.json(req.user);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -100,7 +91,7 @@ router.post("/users/login", async (req, res) => {
     );
     const token = await user.generateAuthToken();
 
-    res.json({ user, token });
+    res.json({ user: user.getPublicProfile(), token });
   } catch (err) {
     res.status(400).json(err);
   }
