@@ -1,4 +1,5 @@
 const Task = require("../models/task.model");
+const User = require("../models/user.model");
 
 class TaskController {
   static async create(req, res) {
@@ -17,11 +18,39 @@ class TaskController {
   }
 
   static async list(req, res) {
-    try {
-      const tasks = await Task.find({ owner: req.user._id });
+    const queries = Object.keys(req.query);
+    const allowedQueries = ["completed"];
+    const match = {};
+    const sort = {};
 
-      res.json(tasks);
+    queries.forEach((query) => {
+      if (allowedQueries.includes(query)) {
+        match[query] = req.query[query];
+      }
+    });
+
+    if (req.query.sort_by) {
+      if (req.query.sort_direction) {
+        sort[req.query.sort_by] = req.query.sort_direction === "desc" ? -1 : 1;
+      } else {
+        sort[req.query.sort_by] = 1;
+      }
+    }
+
+    try {
+      await req.user.populate({
+        path: "tasks",
+        match,
+        options: {
+          limit: parseInt(req.query.limit),
+          skip: parseInt(req.query.skip),
+          sort,
+        },
+      });
+
+      res.json(req.user.tasks);
     } catch (err) {
+      console.log(err);
       res.status(500).json(err);
     }
   }
@@ -73,7 +102,7 @@ class TaskController {
     }
   }
 
-  static async update(req, res) {
+  static async delete(req, res) {
     try {
       const task = await Task.findOneAndDelete({
         _id: req.params.id,

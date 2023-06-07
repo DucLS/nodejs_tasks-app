@@ -5,59 +5,62 @@ const jwt = require("jsonwebtoken");
 const Task = require("./task.model");
 const { Schema } = mongoose;
 
-const userSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    validate(value) {
-      if (value.length < 3) {
-        throw new Error("Name must be at least 3 characters long");
-      }
-    },
-  },
-  age: {
-    type: Number,
-    default: 0,
-  },
-  email: {
-    type: String,
-    unique: true,
-    trim: true,
-    lowercase: true,
-    validate: {
-      validator: async function (value) {
-        if (!validator.isEmail(value)) {
-          throw new Error("Email is invalid");
-        }
-
-        const user = await this.constructor.findOne({ email: value });
-
-        if (user) {
-          throw new Error("Email is already in use");
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      validate(value) {
+        if (value.length < 3) {
+          throw new Error("Name must be at least 3 characters long");
         }
       },
     },
-  },
-  password: {
-    type: String,
-    required: true,
-    trim: true,
-    minLength: 7,
-    validate(value) {
-      if (value.includes("password")) {
-        throw new Error("Password cannot contain 'password'");
-      }
+    age: {
+      type: Number,
+      default: 0,
     },
-  },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
+    email: {
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      validate: {
+        validator: async function (value) {
+          if (!validator.isEmail(value)) {
+            throw new Error("Email is invalid");
+          }
+
+          const user = await this.constructor.findOne({ email: value });
+
+          if (user) {
+            throw new Error("Email is already in use");
+          }
+        },
       },
     },
-  ],
-});
+    password: {
+      type: String,
+      required: true,
+      trim: true,
+      minLength: 7,
+      validate(value) {
+        if (value.includes("password")) {
+          throw new Error("Password cannot contain 'password'");
+        }
+      },
+    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 // Setup foreign key
 userSchema.virtual("tasks", {
