@@ -22,13 +22,20 @@ const userSchema = new Schema({
   email: {
     type: String,
     unique: true,
-    required: true,
     trim: true,
     lowercase: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error("Email is invalid");
-      }
+    validate: {
+      validator: async function (value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email is invalid");
+        }
+
+        const user = await this.constructor.findOne({ email: value });
+
+        if (user) {
+          throw new Error("Email is already in use");
+        }
+      },
     },
   },
   password: {

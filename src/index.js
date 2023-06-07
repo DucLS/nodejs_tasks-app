@@ -5,7 +5,6 @@ const morgan = require("morgan");
 require("./db/mongoose");
 const userRouter = require("./routes/user.route");
 const taskRouter = require("./routes/task.route");
-const auth = require("./middleware/auth");
 
 dotenv.config({ path: __dirname + "/./../.env" });
 
