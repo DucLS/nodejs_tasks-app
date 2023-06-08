@@ -27,6 +27,10 @@ const userSchema = new Schema(
       lowercase: true,
       validate: {
         validator: async function (value) {
+          if (!this.isModified("email")) {
+            return;
+          }
+
           if (!validator.isEmail(value)) {
             throw new Error("Email is invalid");
           }
@@ -58,6 +62,9 @@ const userSchema = new Schema(
         },
       },
     ],
+    avatar: {
+      type: Buffer,
+    },
   },
   { timestamps: true }
 );

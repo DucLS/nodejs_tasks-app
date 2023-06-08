@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const sharp = require("sharp");
 
 class UserController {
   static async list(_, res) {
@@ -104,6 +105,46 @@ class UserController {
       res.json({ Msg: "Logout" });
     } catch (err) {
       res.status(500).json({ Msg: "Logout fail" });
+    }
+  }
+
+  static async uploadAvatar(req, res) {
+    const buffer = await sharp(req.file.buffer)
+      .resize({
+        width: 250,
+        height: 250,
+      })
+      .png()
+      .toBuffer();
+
+    req.user.avatar = buffer;
+    await req.user.save();
+
+    res.send({});
+  }
+
+  static async deleteAvatar(req, res) {
+    try {
+      req.user.avatar = undefined;
+      await req.user.save();
+      res.send({});
+    } catch (err) {
+      res.stats(400).json({ error });
+    }
+  }
+
+  static async getAvatar(req, res) {
+    try {
+      const user = await User.findById(req.params.id);
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      res.set("Content-Type", "image/jpg");
+      res.send(user.avatar);
+    } catch (err) {
+      res.status(404).json(err);
     }
   }
 }
